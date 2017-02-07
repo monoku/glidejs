@@ -1750,7 +1750,10 @@ var Touch = function(Glide, Core) {
      * @return {Void}
      */
     Touch.prototype.start = function(event) {
-
+        if (event.originalEvent.touches.length > 1) {
+            this.isMultitouch = true;
+            return;
+        }
         // Escape if events disabled
         // or already dragging.
         if (!Core.Events.disabled && !this.dragging) {
@@ -1759,9 +1762,6 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mousedown') {
                 touch = event.originalEvent;
             } else {
-                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
-                    return;
-                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
@@ -1798,7 +1798,10 @@ var Touch = function(Glide, Core) {
      * @return {Void}
      */
     Touch.prototype.move = function(event) {
-
+        if (event.originalEvent.touches.length > 1 || this.isMultitouch) {
+            this.isMultitouch = true;
+            return;
+        }
         // Escape if events not disabled
         // or not dragging.
         if (!Core.Events.disabled && this.dragging) {
@@ -1807,9 +1810,6 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mousemove') {
                 touch = event.originalEvent;
             } else {
-                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
-                    return;
-                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
@@ -1880,7 +1880,37 @@ var Touch = function(Glide, Core) {
      * @param {Onject} event
      */
     Touch.prototype.end = function(event) {
+        if (event.originalEvent.touches.length > 1 || this.isMultitouch) {
+            this.isMultitouch = false;
+            
+            Core.Animation.make();
 
+            // Unset dragging flag.
+            this.dragging = false;
+            
+            // After animation.
+            Core.Animation.after(function() {
+                // Enable events.
+                Core.Events.enable();
+                // If autoplay start auto run.
+                Core.Run.play();
+            });
+
+            // Disable other events.
+            Core.Events
+                .attachClicks()
+                .disable()
+                .call(Glide.options.swipeEnd)
+                .trigger('swipeEnd');
+
+            // Remove dragging class and unbind events.
+            Glide.track
+                .removeClass(Glide.options.classes.dragging)
+                .off('touchmove.glide mousemove.glide')
+                .off('touchend.glide touchcancel.glide mouseup.glide mouseleave.glide');
+
+            return;
+        }
         // Escape if events not disabled
         // or not dragging.
         if (!Core.Events.disabled && this.dragging) {
@@ -1892,9 +1922,6 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mouseup' || event.type === 'mouseleave') {
                 touch = event.originalEvent;
             } else {
-                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
-                    return;
-                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
