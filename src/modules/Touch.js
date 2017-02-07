@@ -65,6 +65,9 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mousedown') {
                 touch = event.originalEvent;
             } else {
+                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
+                    return;
+                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
@@ -110,6 +113,9 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mousemove') {
                 touch = event.originalEvent;
             } else {
+                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
+                    return;
+                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
@@ -192,6 +198,9 @@ var Touch = function(Glide, Core) {
             if (event.type === 'mouseup' || event.type === 'mouseleave') {
                 touch = event.originalEvent;
             } else {
+                if (event.originalEvent.touches.length > 1 || event.originalEvent.changedTouches.length > 1) {
+                    return;
+                }
                 touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
             }
 
